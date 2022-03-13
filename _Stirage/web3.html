@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script language="javascript" type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+    <div>
+        <button id="btn">
+            连接钱包
+        </button>
+
+    </div>
+    <div>
+        <button id="btn1">
+            读取
+        </button>
+
+    </div>
+    <div>
+        <button id="btn2">
+            读取
+        </button>
+
+    </div>
+    <script>
+        function getWeb3Provider() {
+            if (!window.web3Provider) {
+                if (!window.ethereum) {
+                    console.error("there is no web3 provider.");
+                    return null;
+                }
+                window.web3Provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+            }
+            return window.web3Provider;
+        }
+        $(document).ready(function () {
+            contract = '0x3FdC831E45d88A145cE1644084f4fa845E9819E8'
+            ABI = [
+                {
+                    "inputs": [],
+                    "name": "retrieve",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "num",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "store",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }
+            ]
+            function getWeb3Provider() {
+                if (!window.web3Provider) {
+                    if (!window.ethereum) {
+                        console.error("there is no web3 provider.");
+                        return null;
+                    }
+                    window.web3Provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+                }
+                return window.web3Provider;
+            }
+
+            $("#btn").click(async function () {
+                if (window.getWeb3Provider() === null) {
+                    console.error('there is no web3 provider.');
+                    return false;
+                }
+                try {
+                    // 获取当前连接的账户地址:
+                    let account = await window.ethereum.request({
+                        method: 'eth_requestAccounts',
+                    });
+                    console.log(account);
+                    // 获取当前连接的链ID:
+                    let chainId = await window.ethereum.request({
+                        method: 'eth_chainId'
+                    });
+                    console.log(chainId);
+                    if (chainId == '0x38') {
+                        console.log('现在是bsc链');
+                    } else {
+                        console.log('现在不是bsc，请切换到bsc链');
+
+                    }
+                    console.log('wallet connected.');
+                    return true;
+                } catch (e) {
+                    console.error('could not get a wallet connection.', e);
+                    return false;
+                }
+            })
+
+            $("#btn1").click(async function () {
+                let contract1 = new ethers.Contract(contract, ABI, window.getWeb3Provider().getSigner());
+                let tx = await contract1.retrieve();
+                console.log(tx);
+            });
+            $("#btn2").click(async function () {
+                let contract1 = new ethers.Contract(contract, ABI, window.getWeb3Provider().getSigner());
+                let tx = await contract1.store(1);
+                console.log(tx);
+                await tx.wait(1);
+                console.log('区块确认成功');
+            });
+
+        })
+
+    </script>
+
+</body>
+
+</html>
